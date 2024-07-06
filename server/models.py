@@ -1,3 +1,5 @@
+# server/models.py
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import MetaData
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -10,7 +12,7 @@ db = SQLAlchemy(metadata=metadata)
 
 # Association table to store many-to-many relationship between employees and meetings
 employee_meetings = db.Table(
-    'employee_meetings',
+    'employees_meetings',
     metadata,
     db.Column('employee_id', db.Integer, db.ForeignKey(
         'employees.id'), primary_key=True),
@@ -25,18 +27,18 @@ class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
     hire_date = db.Column(db.Date)
-
+    
     # Relationship mapping the employee to related meetings
     meetings = db.relationship(
         'Meeting', secondary=employee_meetings, back_populates='employees')
-
+    
     # Relationship mapping the employee to related assignments
     assignments = db.relationship(
         'Assignment', back_populates='employee', cascade='all, delete-orphan')
-
+    
     # Association proxy to get projects for this employee through assignments
     projects = association_proxy('assignments', 'project',
-                                 creator=lambda project_obj: Assignment(project=project_obj))
+                                 creator=lambda project_obj: Assignment(project=project_obj))    
 
     def __repr__(self):
         return f'<Employee {self.id}, {self.name}, {self.hire_date}>'
@@ -49,10 +51,10 @@ class Meeting(db.Model):
     topic = db.Column(db.String)
     scheduled_time = db.Column(db.DateTime)
     location = db.Column(db.String)
-
     # Relationship mapping the meeting to related employees
     employees = db.relationship(
         'Employee', secondary=employee_meetings, back_populates='meetings')
+
 
     def __repr__(self):
         return f'<Meeting {self.id}, {self.topic}, {self.scheduled_time}, {self.location}>'
@@ -64,20 +66,18 @@ class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
     budget = db.Column(db.Integer)
-
+    
     # Relationship mapping the project to related assignments
-    assignments = db.relationship(
-        'Assignment', back_populates='project', cascade='all, delete-orphan')
-
-    # Association proxy to get employees for this project through assignments
+    assignments = db.relationship('Assignment', back_populates='project',cascade='all, delete-orphan') 
+    
+     # Association proxy to get employees for this project through assignments
     employees = association_proxy('assignments', 'employee',
                                   creator=lambda employee_obj: Assignment(employee=employee_obj))
-
+    
     def __repr__(self):
         return f'<Review {self.id}, {self.title}, {self.budget}>'
-
-
-# Association Model to store many-to-many relationship with attributes between employee and project
+    
+# Association Model to store many-to-many relationship between employee and project
 class Assignment(db.Model):
     __tablename__ = 'assignments'
 

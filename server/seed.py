@@ -7,7 +7,7 @@ from models import db, Employee, Meeting, Project, Assignment, employee_meetings
 
 with app.app_context():
 
-    # Delete all rows in tables
+# Delete all rows in tables
     db.session.query(employee_meetings).delete()
     db.session.commit()
     Employee.query.delete()
@@ -42,17 +42,15 @@ with app.app_context():
     db.session.commit()
 
     # Many-to-many relationship between employee and meeting
-
-    # Add meetings to an employee
     e1.meetings.append(m1)
     e1.meetings.append(m2)
     # Add employees to a meeting
     m2.employees.append(e2)
     m2.employees.append(e3)
     m2.employees.append(e4)
+    db.session.commit()  
 
     # Many-to-many relationship between employee and project through assignment
-
     a1 = Assignment(role='Project manager',
                     start_date=datetime.datetime(2023, 5, 28),
                     end_date=datetime.datetime(2023, 10, 30),
